@@ -6,14 +6,14 @@ public class Vector extends Point {
 	public Vector(double x, double y, double z) throws IllegalArgumentException
 	{
 		super(x,y,z);
-		if(this.equals(Double3.ZERO))
+		if(this.xyz.equals(Double3.ZERO))
 			throw new IllegalArgumentException("vector cannot be zero");
 	}
 	
 	public Vector (Double3 v) throws IllegalArgumentException
 	{
 		super(v);
-		if(this.equals(Double3.ZERO))
+		if(this.xyz.equals(Double3.ZERO))
 			throw new IllegalArgumentException("vector cannot be zero");
 	}
 	
@@ -42,10 +42,9 @@ public class Vector extends Point {
 		return x;}
 		catch(Exception IllegalArgumentException)
 		{
-			return (Double3.ZERO);
-		}
-		
-		
+			Point j =  new Point(0,0,0);
+			return (Vector) (j);
+		}		
 	}
 	
 	
