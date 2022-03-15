@@ -1,5 +1,6 @@
 package primitives;
 
+import static primitives.Util.isZero;
 
 public class Point {
 	protected final Double3 xyz;
@@ -10,7 +11,18 @@ public class Point {
 		this.xyz=new Double3(x,y,z);
 		
 	}
-	
+
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof Point))
+			return false;
+		Point other = (Point) obj;
+		return isZero(xyz.d1 - other.xyz.d1) && isZero(xyz.d2 - other.xyz.d2) && isZero(xyz.d3 - other.xyz.d3);
+	}
+
 	//constructor that gets a Double3 object
 	public Point(Double3 xyz)
 	{
