@@ -1,58 +1,88 @@
 package primitives;
-
-import static primitives.Util.isZero;
+/**
+ * Class Point is the basic class representing a … of Euclidean primitives in Cartesian
+ * 3-Dimensional coordinate system.
+ * @author noale
+*/
 
 public class Point {
-	protected final Double3 xyz;
-	
-	//Constructor that gets 3 doubles
-	public Point(double x, double y, double z)
-	{
-		this.xyz=new Double3(x,y,z);
-		
-	}
-
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (!(obj instanceof Point))
-			return false;
-		Point other = (Point) obj;
-		return isZero(xyz.d1 - other.xyz.d1) && isZero(xyz.d2 - other.xyz.d2) && isZero(xyz.d3 - other.xyz.d3);
-	}
-
-	//constructor that gets a Double3 object
-	public Point(Double3 xyz)
-	{
+	 Double3 xyz;
+	 /**
+	  * constructor that receiving Object from Double3 type 
+	  * @param xyz
+	  */
+		 
+	public Point(Double3 xyz){
 		this.xyz=xyz;
 	}
-	
-	//subtraction between two points, returns a vector
-	public Vector subtract(Point other)
-	{
-		return new Vector(this.xyz.subtract(other.xyz));
+	/**
+	 * constructor that receiving the values of the three coordinates from Double
+	 * @param d1
+	 * @param d2
+	 * @param d3
+	 */
+	public Point(double d1,double d2,double d3){
+		this.xyz=new Double3(d1,d2,d3);
 	}
 	
-	public Point add(Vector other)
-	{
-		Point j =new Point(this.xyz.add(other.xyz));
-		return j;
-	}
-	public double distanceSquared(Point other)
-	{
-		Vector d=this.subtract(other);
-		return (d.xyz.d1*d.xyz.d1+d.xyz.d2*d.xyz.d2+d.xyz.d3*d.xyz.d3);
-	}
-	public double distance(Point other)
-	{
-		return Math.sqrt(this.distanceSquared(other));
-	}
+	
+	@Override
+	  public boolean equals(Object obj) {
+	      if (this == obj) return true;
+	      if (obj == null) return false;
+	      if (!(obj instanceof Point)) return false;
+	      Point other = (Point)obj;
+	      return this.xyz.equals(other.xyz);
+	   }
+	
 	
 	@Override
 	public String toString() {
-		return "("+ this.xyz.d1+", "+this.xyz.d2+", "+this.xyz.d3+")";
-	}	
+		return "Point [xyz=" + xyz.toString() + "]";
+	}
 
+	
+	/**
+	 * Sum two floating point triads into a new triad where each couple of numbers
+	 * is summarized
+	 * 
+	 * @param rhs right handle side operand for addition
+	 * @return result of add
+	 */
+	public Point add(Vector v) {
+		return new Point(v.xyz.add(this.xyz));
+	}
+	/**
+	 * Subtract two floating point triads into a new triad where each couple of
+	 * numbers is subtracted
+	 * 
+	 * @param rhs right handle side operand for addition
+	 * @return result of e
+	 */
+	public Vector subtract(Point p) {
+		return new Vector(this.xyz.subtract(p.xyz));
+	}
+	public Double3 getXyz() {
+		return xyz;
+	}
+	
+	/**
+	 * calculate squared distance between two points
+	 * @param p- point
+	 * @return squared distance between two points 
+	 */
+	public double DistanceSquared(Point p) {
+		//Point p=new Point(d);
+		Point po=new Point(p.xyz.subtract(this.xyz));
+		return po.xyz.d1*po.xyz.d1 + po.xyz.d2*po.xyz.d2 + po.xyz.d3*po.xyz.d3;
+	}
+	/**
+	 * calculate the distance between two points 
+	 * @param p- point
+	 * @return distance between two points 
+	 */
+	public  double Distance(Point p) {
+		//Point p=new Point(d);
+		return Math.sqrt(DistanceSquared(p));
+	 }
 }

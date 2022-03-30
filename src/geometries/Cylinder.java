@@ -1,26 +1,30 @@
 package geometries;
 
-import primitives.Ray;
+import java.util.List;
 
-public class Cylinder extends Tube {
+import primitives.Point;
+import primitives.Ray;
+import primitives.Vector;
+
+public class Cylinder  extends Tube {
 	
-	double height;
-	
-	public Cylinder(double height, Ray axisRay, double radius)
-	{
+	public Cylinder(Ray axisRay, double radius) {
 		super(axisRay, radius);
-		this.height=height;
+		// TODO Auto-generated constructor stub
 	}
 
-	public double getHeight() {
-		return height;
+	private double height;
+	
+	@Override
+	public List<Point> findIntsersections(Ray ray) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
-	public String toString() {
-		return "Cylinder [height=" + height + ", axisRay=" + axisRay + ", radius=" + radius + "]";
+	public Vector getNormal(Point p) {
+		// TODO Auto-generated method stub
+		return null;
 	}
-
-	
 
 }

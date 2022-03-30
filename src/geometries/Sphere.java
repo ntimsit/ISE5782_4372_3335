@@ -1,26 +1,23 @@
 package geometries;
 
+import java.util.List;
+
 import primitives.Point;
+import primitives.Ray;
 import primitives.Vector;
 
-public class Sphere implements Geometry {
-	
-	Point center;
-	double radius;
-	
-	public Sphere(Point center, double radius)
-	{
-		super();
-		this.center=center;
-		this.radius=radius;
+public class Sphere implements Geometry  {
+	private Double radius;
+	private Point center;
+
+	public Sphere(Point p1, int i) {
+		// TODO Auto-generated constructor stub
 	}
 
-	public Point getCenter() {
-		return center;
-	}
-
-	public double getRadius() {
-		return radius;
+	@Override
+	public List<Point> findIntsersections(Ray ray) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
@@ -28,14 +25,5 @@ public class Sphere implements Geometry {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-	@Override
-	public String toString() {
-		return "Sphere [center=" + center + ", radius=" + radius + "]";
-	}
-	
-	
-
-	
 
 }
