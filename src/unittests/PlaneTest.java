@@ -14,7 +14,7 @@ class PlaneTest {
 
 	@Test
 	
-	void testPlanePointPointPoint() {
+	void testPlanePoint() {
 		try {
 			new Plane(new Point(1,2,3),new Point(2,4,6),new Point(4,8,12));//a case that all the points are on the same vector- cannot create the plane
 			fail("GetNormal() should throw an exception, but it failed");

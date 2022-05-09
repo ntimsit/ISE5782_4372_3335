@@ -21,10 +21,11 @@ public class Cylinder  extends Tube {
 		return null;
 	}
 
-	@Override
-	public Vector getNormal(Point p) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	 @Override
+	    public Vector getNormal(Point point) {
+		    double t = axisRay.getDir().dotProduct(point.subtract(axisRay.getP0()));
+		    Point O = axisRay.getP0().add(axisRay.getDir().scale(t));
+		    return point.subtract(O).normalize();
+	 }
 
 }

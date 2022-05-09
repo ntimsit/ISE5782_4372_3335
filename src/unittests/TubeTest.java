@@ -6,8 +6,10 @@ import org.junit.jupiter.api.Test;
 import primitives.Point;
 import primitives.Ray;
 import primitives.Ray.*;
+import primitives.Util;
 import primitives.Vector;
 
+//import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -18,6 +20,7 @@ class TubeTest {
     /**
      *
      */
+	/*
     @Test
     public void testGetNormal() {
         // ============ Equivalence Partitions Tests ==============
@@ -33,4 +36,19 @@ class TubeTest {
             fail("GetNormal() should throw an exception, but it failed");
         } catch (Exception e) {}
     }
+    */
+    
+	/**
+	 * Test method for {@link Tube#getNormal(Point3D)}.
+	 */
+	@Test
+	public void testGetNormal() {
+		// ============ Equivalence Partitions Tests ==============
+				Ray r;
+				r = new Ray(new Vector(0,0,1), new Point(0,0,0));
+				Tube t=new Tube(r,1);
+				Point p=new Point(1,0,1);
+				Vector normal=t.getNormal(p);
+				assertTrue(Util.isZero(r.getDir().dotProduct(normal)), "bad normal to tube");
+				}
 }
