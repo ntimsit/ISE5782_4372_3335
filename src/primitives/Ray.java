@@ -1,4 +1,7 @@
 package primitives;
+
+import java.util.List;
+
 /**
  * Class Ray is the basic class representing a Ray of Euclidean primitives in Cartesian
  * Object is founded in geometry
@@ -31,6 +34,26 @@ public class Ray {
 			// TODO Auto-generated method stub
 			return dir;
 		}
+		/**
+	     * A function that returns the point closest to the head of the ray
+	     * If the list is empty or null the function returns null
+	     *
+	     * @param points the list of the points
+	     * @return the closest point
+	     */
+	    public Point findClosestPoint(List<Point> points) {
+	        if (points == null)
+	            return null;
+	        double minDistance = Double.MAX_VALUE;
+	        Point minPoint = null;
+	        for (Point point : points) {
+	            if (p0.Distance(point) < minDistance) {
+	                minDistance = p0.Distance(point);
+	                minPoint = point;
+	            }
+	        }
+	        return minPoint;
+	    }
 		
 
 }

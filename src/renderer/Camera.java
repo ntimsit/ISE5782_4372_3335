@@ -140,6 +140,22 @@ public Ray constructRay(int nX, int nY, int j, int i){
     //Ray: {p0 = P0, direction = vi,j}
     return new Ray(vIJ, p0);
 }
+public Object setImageWriter(ImageWriter imageWriter) {
+	// TODO Auto-generated method stub
+	return null;
+}
+public void renderImage() {
+	// TODO Auto-generated method stub
+	
+}
+public void writeToImage() {
+	// TODO Auto-generated method stub
+	
+}
+public void printGrid(int i, Color color) {
+	// TODO Auto-generated method stub
+	
+}
 
 
 }

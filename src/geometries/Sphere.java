@@ -15,7 +15,7 @@ public class Sphere implements Geometry  {
 	private Double radius;
 	private Point center;
 
-	public Sphere(Point p1, double radius) {
+	public Sphere(double radius, Point p1) {
 		 super();
 	        this.center = center;
 	        this.radius = radius;
