@@ -6,7 +6,7 @@ import primitives.Point;
 import primitives.Ray;
 import primitives.Vector;
 
-public class Tube implements Geometry{
+public class Tube extends Geometry{
 	
 	Ray axisRay;
 	double radius;

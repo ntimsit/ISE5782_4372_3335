@@ -8,7 +8,7 @@ import primitives.Vector;
 import static primitives.Util.*;
 
 
-public class Plane implements Geometry{
+public class Plane extends Geometry{
 	
 	private Point q0;
 	private Vector normal;
