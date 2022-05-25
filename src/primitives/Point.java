@@ -6,7 +6,7 @@ package primitives;
 */
 
 public class Point {
-	 Double3 xyz;
+	 protected Double3 xyz;
 	 /**
 	  * constructor that receiving Object from Double3 type 
 	  * @param xyz
@@ -85,4 +85,14 @@ public class Point {
 		//Point p=new Point(d);
 		return Math.sqrt(DistanceSquared(p));
 	 }
+	public double getX() {
+		return  this.xyz.d1 ;
+	}
+	public double getY() {
+		return  this.xyz.d2 ;
+	}
+	public double getZ() {
+		return  this.xyz.d3 ;
+	}
+	
 }

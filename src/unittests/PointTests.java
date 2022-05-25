@@ -14,7 +14,7 @@ import primitives.Vector;
  * @author noale
  *
  */
-class PointTest {
+class PointTests {
 
 	/**
 	 * Test method for {@link primitives.Point#add(primitives.Vector)}.
@@ -132,6 +132,4 @@ class PointTest {
 				 assertEquals(Math.sqrt(3),d);
 		
 	}
-	//Point (0,0,0)!! exception must !
-
 }

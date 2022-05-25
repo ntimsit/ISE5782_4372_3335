@@ -31,10 +31,12 @@ public class Plane extends Geometry{
  * constructor who gets one point and  the normalize vector and creates a plain
  * @param q0
  * @param normal
+ * @throws Exception 
  */
-	public Plane(Point q0, Vector normal) {
+	public Plane(Point q0, Vector normal)  {
 		super();
-		
+		if(q0.equals(normal))
+		{throw new IllegalArgumentException();}
 		this.q0 = q0;
 		this.normal =normal.normalize();
 	}
@@ -62,36 +64,52 @@ public class Plane extends Geometry{
 	}
 	@Override
 	public Vector getNormal(Point p) {
-		return normal;
+		return getNormal();
 	}
 
 	@Override
-	public List<Point> findIntsersections(Ray ray) {
+	  public boolean equals(Object obj) {
+	      if (this == obj) return true;
+	      if (obj == null) return false;
+	      if (!(obj instanceof Plane)) return false;
+	      Plane other = (Plane)obj;
+	      return this.normal.equals(other.normal)&&this.q0.equals(other.q0);
+	   }
+	@Override
+	public List<GeoPoint> findGeoIntersectionsHelper(Ray ray,double maxDistance) {
+		double nv = getNormal().dotProduct(ray.getDir());
+		if (isZero(nv))
+			return null;
 		try {
-			Vector vec=q0.subtract(ray.getP0());//creating a new vector according to the point q0 and the starting point of the ray (P0)
-
-			double t=normal.dotProduct(vec);//dot product between the vector we created and the normal of the plane
-
-			if(isZero(normal.dotProduct(ray.getDir()))) //if the dot product equals 0 it means that the ray is parallel (makbil) to the plane
-				return null;
-			t=t/(normal.dotProduct(ray.getDir()));
-
-			if(t==0) //if the distance between the p0-the start point of the ray and the plane is 0, its not counted in the intersections list
-				return null;//no intersections
-			else if(t > 0) // the ray crosses the plane
-			{
-				Point p=ray.getPoint(t);//get the new point on the ray, multiplied by the scalar t. p is the intersection point.
-				return List.of(new Point(p.getXyz()));//if so, return the point- the intersection
+			double numer = getNormal().dotProduct(getQ0().subtract(ray.getP0()));
+			double t = alignZero(numer / nv);
+			if (t > 0 && alignZero(t - maxDistance) <= 0) {
+				var p1 = ray.getPoint(t);
+				return List.of(new GeoPoint(this, p1));
 			}
-			else // the ray doesn't cross the plane
-				return null;	
-		}
-
-		catch(Exception ex) //catch exceptions in the vector creation
-		{
+		} catch (Exception e) {
 			return null;
 		}
+		return null;
 	}
+
+	/*@Override
+    public List<GeoPoint> findGeoIntersectionsHelper(Ray ray) {
+
+        if (ray.getP0().equals(q0) || isZero(this.normal.dotProduct(ray.getDir()))
+                || isZero(this.normal.dotProduct(q0.subtract(ray.getP0()))))
+            return null;
+
+        double t = (this.normal.dotProduct(q0.subtract(ray.getP0()))) / (this.normal.dotProduct(ray.getDir()));
+        if (t < 0) 
+            return null;
+
+        //In case there is intersection with the plane return the point
+        GeoPoint p = new GeoPoint(this, ray.getPoint(t));
+        LinkedList<GeoPoint> result = new LinkedList<GeoPoint>();
+        result.add(p);
+        return result;
+    }*/
 
 	
 }

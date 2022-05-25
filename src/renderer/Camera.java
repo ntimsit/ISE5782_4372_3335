@@ -2,7 +2,14 @@
  * 
  */
 package renderer;
-import primitives.*;
+
+import java.util.MissingResourceException;
+
+import primitives.Color;
+import primitives.Point;
+import primitives.Ray;
+import primitives.Util;
+import primitives.Vector;
 
 /**
  * @author noale
@@ -10,152 +17,150 @@ import primitives.*;
  */
 public class Camera {
 	private Point p0;
-    private Vector vTo;
-    private Vector vUp;
-    private Vector vRight;
-    private double width;
-    private double height;
-    private double distance;
+	private Vector vUp;
+	private Vector vTo;
+	private Vector vRight;
+	private double width;
+	private double height;
+	private double distance;
+	private ImageWriter imageWriter;
+	private RayTracerBase rayTracer;
+	public Point getP0() {
+		return p0;
+	}
+	public Camera setImageWriter(ImageWriter imageWriter) {
+		this.imageWriter = imageWriter;
+		return this;
+	}
+	public Camera setRayTracerBase(RayTracerBase rayTracerBase) {
+		this.rayTracer = rayTracerBase;		
+		return this;
+	}
+	public Vector getvUp() {
+		return vUp;
+	}
+	public Vector getvTo() {
+		return vTo;
+	}
+	public Vector getvRight() {
+		return vRight;
+	}
+	public double getWidth() {
+		return width;
+	}
+	public double getHeight() {
+		return height;
+	}
+	public double getDistance() {
+		return distance;
+	}
+	/**
+	 * A camera constructor that receives two vectors in the direction of the
+	 * camera(up,to) and point3d for the camera lens
+	 * 
+	 * @param p0  - location of the camera lens
+	 * @param vTo - starting at P0 and pointing forward
+	 * @param vUp -starting at P0 and pointing upwards
+	 */
+	public Camera(Point p0, Vector vTo, Vector vUp) {
+		if (!Util.isZero(vUp.dotProduct(vTo))) // check if vTo not plumb to vUp
+			throw new IllegalArgumentException("Vectors are not vertical");
+		this.p0 = p0;
+		this.vTo = vTo.normalize();
+		this.vUp = vUp.normalize();
+		this.vRight = vTo.crossProduct(vUp).normalize();
+	}
+	/**
+	 * setter for size of view plane
+	 * 
+	 * @param width  - a width of plane view
+	 * @param height - a height of plane view
+	 * @return the camera himself
+	 */
+	public Camera setViewPlaneSize(double width, double height) {
+		this.width = width;
+		this.height = height;
+		return this;
+	}
 
+	/**
+	 * setter for distance from camera to view plane
+	 * 
+	 * @param distance - a distance from camera to view plane
+	 * @return the camera himself
+	 */
+	public Camera setViewPlaneDistance(double distance) {
+		this.distance = distance;
+		return this;
+	}
 
-/**
- * constructor
- * @param p0 point p0
- * @param vTo vTo
- * @param vUp vUp
- * @throws IllegalArgumentException if vTo and vUp are not vertical to each other
- */
-public Camera(Point p0, Vector vTo, Vector vUp) throws IllegalArgumentException{
-    if(Util.alignZero(vTo.dotProduct(vUp)) != 0 )
-        throw new IllegalArgumentException(vTo + " and " + vUp + " are not vertical to each other");
-    this.p0 = p0;
-    this.vTo = vTo.normalize();
-    this.vUp = vUp.normalize();
-    vRight = vTo.crossProduct(vUp).normalize();
-    width = 0;
-    height = 0;
-}
-/**
- * @return p0
- */
-public Point getP0() {
-    return p0;
-}
+	/**
+	 * The function builds a ray through a given pixel (j,i) within the grid of nX
+	 * and nY
+	 * 
+	 * @param nX - the size of width
+	 * @param nY - the size of height
+	 * @param j  - the index in the column
+	 * @param i  - the index in the row
+	 * @return ray that passes in given pixel in the grid
+	 */
+	public Ray constructRayThroughPixel(int nX, int nY, int j, int i) {
 
-/**
- * @return vTo
- */
-public Vector getVTo() {
-    return vTo;
-}
+		// image center
+		Point pc = p0.add(vTo.scale(distance));
+		// ratio
+		var ry = height / nY;
+		var rx = width / nX;
+		// pixel(i,j) center
+		var yi = (i - (nY - 1) / 2.0) * ry;
+		var xj = (j - (nX - 1) / 2.0) * rx;
 
-/**
- * @return vUp
- */
-public Vector getVUp() {
-    return vUp;
-}
+		Point pij = pc;
+		if (xj != 0)
+			pij = pij.add(vRight.scale(xj));
+		if (yi != 0)
+			pij = pij.add(vUp.scale(-yi));
 
-/**
- * @return vRight
- */
-public Vector getVRight() {
-    return vRight;
-}
+		Vector vij = pij.subtract(p0);
 
-/**
- * @return width of the view plane
- */
-public double getWidth() {
-    return width;
-}
-
-/**
- * @return height of the view plane
- */
-public double getHeight() {
-    return height;
-}
-
-/**
- * @return distance of the view plane
- */
-public double getDistance() {
-    return distance;
-}
-
-/**
- * Update the view plane
- * @param width - new width
- * @param height - new height
- * @return this camera
- */
-public Camera setVPSize(double width, double height){
-    this.width = width;
-    this.height = height;
-    return this;
-}
-
-/**
- * Update the distance of the view plane
- * @param distance - new distance
- * @return this camera
- */
-public Camera setVPDistance(double distance){
-    this.distance = distance;
-    return this;
-}
-
-/**
- * Construct a ray which go through pixel (i, j)
- * @param nX number of pixels in a row (width)
- * @param nY number of pixels in a column (height)
- * @param j column index of a pixel
- * @param i row index of a pixel
- * @return ray through pixel (i,j)
- */
-/*
-public Ray constructRay(int nX, int nY, int j, int i) 
-{
-	return null;
-}
-*/
-public Ray constructRay(int nX, int nY, int j, int i){
-    //Image center:
-    Point center = p0.add(vTo.scale(distance));
-    //Ratio: (pixel width & height)
-    double rY = Util.alignZero(height / nY);
-    double rX = Util.alignZero(width / nX);
-    //Pixel[i,j] center
-    double yI = Util.alignZero(-1 * (i - (nY - 1.0) / 2.0) * rY);
-    double xJ = Util.alignZero((j - (nX - 1.0) / 2.0) * rX);
-    //Pi,j:
-    Point pIJ = center;
-    if(xJ != 0)
-        pIJ = pIJ.add(vRight.scale(xJ));
-    if(yI != 0)
-        pIJ = pIJ.add(vUp.scale(yI));
-    //vi,j = Pi,j − P0
-    Vector vIJ = pIJ.subtract(p0);
-    //Ray: {p0 = P0, direction = vi,j}
-    return new Ray(vIJ, p0);
-}
-public Object setImageWriter(ImageWriter imageWriter) {
-	// TODO Auto-generated method stub
-	return null;
-}
-public void renderImage() {
-	// TODO Auto-generated method stub
-	
-}
-public void writeToImage() {
-	// TODO Auto-generated method stub
-	
-}
-public void printGrid(int i, Color color) {
-	// TODO Auto-generated method stub
-	
-}
-
-
+		return new Ray(vij,p0);
+	}
+	public Camera renderImage()
+	{
+		if(this.p0==null || this.vTo==null|| this.vUp==null || this.rayTracer==null || this.vRight==null||this.imageWriter==null)
+			throw new MissingResourceException("one of the properties contains empty value", null, null);
+		//throw new UnsupportedOperationException();
+		for (int i = 0; i <imageWriter.getNy() ; i++) {
+			for (int j = 0; j < imageWriter.getNx(); j++) {
+				castRay(imageWriter.getNx(),imageWriter.getNy(),j,i);
+			}
+		}
+		return this;
+	}
+	public void printGrid(int interval, Color color) 
+	{
+		if(this.imageWriter==null)
+			throw new MissingResourceException("image writer failed", null, null);
+		var writer = new ImageWriter("firstImage", 800, 500);
+		for (int i = 0; i < 500; i++) {
+			for (int j = 0; j < 800; j++) {
+				if (i % 50 == 0 || j % 50 == 0 || i == 799 || j == 499)
+					writer.writePixel(j, i, color);
+				else
+					writer.writePixel(j, i, new primitives.Color(0,0,255));
+			}
+		}
+		writer.writeToImage();
+	}
+	public void writeToImage()
+	{
+		if(this.imageWriter==null)
+			throw new MissingResourceException("image writer failed", null, null);
+		imageWriter.writeToImage();
+	}
+	private void castRay(int nX, int nY, int col, int row) {
+		Ray ray = constructRayThroughPixel(nX, nY, col, row);
+		Color color = rayTracer.traceRay(ray);
+		imageWriter.writePixel(col, row, color);
+	}
 }

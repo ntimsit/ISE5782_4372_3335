@@ -1,121 +1,117 @@
 package unittests;
 
-import org.junit.Test;
-import renderer.Camera;
-import primitives.*;
-import geometries.*;
-import java.util.ArrayList;
-import java.util.List;
 import static org.junit.Assert.*;
 
+import java.util.LinkedList;
+import geometries.*;
+import geometries.Intersectable.GeoPoint;
+import primitives.*;
+import org.junit.Test;
+
+import renderer.Camera;
+
+/**
+ * tests for Integration between rays from camera and geometry body
+ * 
+ * @author noale
+ */
 public class IntegrationTests {
-	Point p5=new Point(0,0,0);
 
-    /**
-     * Integration between constructRayThroughPixel of camera & findIntsersections of a plane
-     * {@link Camera#constructRayThroughPixel(int, int, int, int)}
-     * {@link Plane#findIntersections(Ray)}
-     */
-    @Test
-    public void integrationTestForPlane(){
-    	
-        Camera camera = new Camera(p5, new Vector(0, 0, -1), new Vector(0, 1, 0)).setVPDistance(4).setVPSize(6, 6);
+	/**
+	 * test integration ray from camera with sphere
+	 */
+	@Test
+	public void testIntegrationWithSphere() {
+		Sphere sphere = new Sphere(new Point(0, 0, -3), 1);
+		Camera camera = new Camera(new Point(Double3.ZERO), new Vector(0, 0, -1), new Vector(0, 1, 0));
+		camera.setViewPlaneDistance(1).setViewPlaneSize(3, 3);
 
-        // TC05: (9 points)
-        // Plane is in parallel to XY plane, so all of the rays will intersect the plane.
-        runTestOnVP(camera, new Plane(new Point(0, 0, -6), new Vector(0, 0, 1)), 9);
+		// TC01: Two intersection points
+		assertEquals("First test case: should be 2 intersection points", 2, calcSumIntersection(camera, sphere, 3, 3));
 
-        // TC06: (0 points)
-        // Plane is in parallel to XZ plane and at same axle with the center of the camera, so all of the rays will not intersect the plane.
-        runTestOnVP(camera, new Plane(new Point(0, 0, -6), new Vector(0, 1, 0)), 0);
+		// TC02: 18 intersection points
+		sphere = new Sphere(new Point(0, 0, -2.5), 2.5);
+		camera = new Camera(new Point(0, 0, 0.5), new Vector(0, 0, -1), new Vector(0, 1, 0));
+		camera.setViewPlaneDistance(1).setViewPlaneSize(3, 3);
+		assertEquals("Second test case: should be 18 intersection points", 18,
+				calcSumIntersection(camera, sphere, 3, 3));
 
-        // TC07: (0 points)
-        // Plane is in parallel to YZ plane and at same axle with the center of the camera , so all of the rays will intersect the plane.
-        runTestOnVP(camera, new Plane(new Point(0, 0, -6), new Vector(1, 0, 0)), 0);
+		// TC03: 10 intersection points
+		sphere = new Sphere(new Point(0, 0, -2), 2);
+		assertEquals("Third test case: should be 10 intersection points", 10,
+				calcSumIntersection(camera, sphere, 3, 3));
 
-        // TC08: (6 points)
-        // Plane is placed in way so the rays going through the bottom of the camera's plane are in parallel to the Plane. Hence only 6 intersections.
-        runTestOnVP(camera, new Plane(new Point(0, 0, -6), new Vector(0, -4, 1)), 6);
+		// TC04: 9 intersection points
+		sphere = new Sphere(new Point(0, 0, -1), 4);
+		assertEquals("Fourth test case: should be 9 intersection points", 9, calcSumIntersection(camera, sphere, 3, 3));
 
-        // TC09: (9 points)
-        // Plane has some curve but in way so all of the rays can intersect it. Hence 9 intersections.
-        runTestOnVP(camera, new Plane(new Point(0, 0, -6), new Vector(0, 1, -1)), 9);
+		// TC05: 0 intersection points
+		sphere = new Sphere(new Point(0, 0, 1), 0.5);
+		assertEquals("Fifth test case: should be 0 intersection points", 0, calcSumIntersection(camera, sphere, 3, 3));
+	}
 
-        // TC10: (3 points)
-        // Plane is in parallel to XZ Plane but placed in way so only the rays going through the top of the camera's plane will intersect it. Hence only 3 intersections.
-        runTestOnVP(camera, new Plane(new Point(0, 8, -16), new Vector(0, 1, 0)), 3);
+	/**
+	 * test integration ray from camera with plane
+	 */
+	@Test
+	public void testIntegrationWithPlane() {
+		Plane plane = new Plane(new Point(0, 0, -3), new Vector(0, 0, 1));
+		Camera camera = new Camera(new Point(Double3.ZERO), new Vector(0, 0, -1), new Vector(0, 1, 0));
+		camera.setViewPlaneDistance(1).setViewPlaneSize(3, 3);
 
-        // TC11: (3 points)
-        // Plane is in parallel to YZ Plane but placed in way so only the rays going through the left side of the camera's plane will intersect it. Hence only 3 intersections.
-        runTestOnVP(camera, new Plane(new Point(-8, 0, -16), new Vector(1, 0, 0)), 3);
-    }
+		// TC01: 9 intersection points
+		assertEquals("First test case: should be 9 intersection points", 9, calcSumIntersection(camera, plane, 3, 3));
 
-    /**
-     * Integration between constructRayThroughPixel of camera & findIntsersections of a triangle
-     * {@link Camera#constructRayThroughPixel(int, int, int, int)}
-     * {@link Triangle#findIntersections(Ray)}
-     */
-    @Test
-    public void integrationTestForTriangle(){
-        Camera camera = new Camera(p5, new Vector(0, 0, -1), new Vector(0, 1, 0)).setVPDistance(1).setVPSize(3, 3);
-        //Polygon polygon;
+		// TC02: 9 intersection points
+		plane = new Plane(new Point(0, 0, -2.5), new Vector(0, -0.9, 1));
+		assertEquals("Second test case: should be 9 intersection points", 9, calcSumIntersection(camera, plane, 3, 3));
 
-        // TC01:
-        // Triangle is facing to the camera. Triangle is small so only one ray will intersect the triangle.
-        runTestOnVP(camera, new Triangle(new Point(0, 1, -2), new Point(1, -1, -2), new Point(-1, -1, -2)), 1);
+		// TC03: 6 intersection points
+		plane = new Plane(new Point(0, 0, -3), new Vector(0, -1, 1));
+		assertEquals("Third test case: should be 6 intersection points", 6, calcSumIntersection(camera, plane, 3, 3));
 
-        // TC02:
-        // Triangle is facing to the camera. Triangle is above the rays going through the bottom of the camera's plane.
-        // So only the rays going through the middle and the top of the camera's plane will intersect.
-        runTestOnVP(camera, new Triangle(new Point(0, 20, -2), new Point(1, -1, -2), new Point(-1, -1, -2)), 2);
+	}
 
-        // TC03:
-        // Triangle is facing to the camera. Triangle is big enough and covers the camera's plane so there are 9 intersections.
-        runTestOnVP(camera, new Triangle(new Point(0, 100, -5), new Point(50, -50, -5), new Point(-50, -50, -5)), 9);
-    }
+	/**
+	 * test integration ray from camera with triangle
+	 */
+	@Test
+	public void testIntegrationWithTriangle() {
+		Triangle tri = new Triangle(new Point(1, -1, -2), new Point(0, 1, -2), new Point(-1, -1, -2));
+		Camera camera = new Camera(new Point(Double3.ZERO), new Vector(0, 0, -1), new Vector(0, 1, 0));
+		camera.setViewPlaneDistance(1).setViewPlaneSize(3, 3);
 
-    /**
-     * Integration between constructRayThroughPixel of camera & findIntsersections of a sphere
-     * {@link Camera#constructRayThroughPixel(int, int, int, int)}
-     * {@link Sphere#findIntersections(Ray)}
-     */
-    @Test
-    public void integrationTestForSphere(){
-        Camera camera;
+		// TC01: 1 intersection point
+		assertEquals("First test case: should be 1 intersection point", 1, calcSumIntersection(camera, tri, 3, 3));
 
-        // TC01:
-        camera = new Camera(p5, new Vector(0, 0, -1), new Vector(0, 1, 0)).setVPDistance(1).setVPSize(3, 3);
-        //runTestOnVP(camera, new Sphere(new Point(0, 0, -3), 1), 2);
+		// TC02: 2 intersection points
+		tri = new Triangle(new Point(1, -1, -2), new Point(0, 20, -2), new Point(-1, -1, -2));
+		assertEquals("Second test case: should be 2 intersection points", 2, calcSumIntersection(camera, tri, 3, 3));
+	}
 
-        // TC02:
-        camera = new Camera(new Point(0, 0, 0.5), new Vector(0, 0, -0.5), new Vector(0, 1, 0)).setVPDistance(1).setVPSize(3, 3);
-        //runTestOnVP(camera, new Sphere(new Point(0, 0, -2.5), 2.5), 18);
-
-        // TC03:
-        //runTestOnVP(camera, new Sphere(new Point(0, 0, -2), 2), 10);
-
-        // TC04:
-        //runTestOnVP(camera, new Sphere(new Point(0, 0, -1), 4), 9);
-
-        // TC05:
-        //runTestOnVP(camera, new Sphere(new Point(0, 0, 1), 0.5), 0);
-    }
-
-    /**
-     * get camera, intersectable and number of intersections and test
-     * @param camera - camera
-     * @param intersectable - intersectable object
-     * @param numberOfIntersections - number of intersections needed for passing the test
-     */
-    public void runTestOnVP(Camera camera, Intersectable intersectable, int numberOfIntersections){
-        List<Point> allIntsersections = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                List<Point> intsersections = intersectable.findIntsersections(camera.constructRay(3, 3, i, j));
-                if(intsersections != null)
-                    allIntsersections.addAll(intsersections);
-            }
-        }
-        assertEquals("Wrong number of intersection points", numberOfIntersections, allIntsersections.size());
-    }
+	/**
+	 * The function doing
+	 * <li>Generate rays through all pixels of View Plane
+	 * <li>Summarize amount of intersections of all the rays
+	 * 
+	 * @param cam  -the current camera
+	 * @param body -geometry body that implements {@link geometries.Intersectable}
+	 * @param nX   - sum of columns in view plane
+	 * @param nY   - sum of lines in view plane
+	 * @return sum of intersections between "body" and every ray from "cam"
+	 */
+	private int calcSumIntersection(Camera cam, Intersectable body, int nX, int nY) {
+		var rays = new LinkedList<Ray>();
+		for (int i = 0; i < nX; i++)
+			for (int j = 0; j < nY; j++) {
+				rays.add(cam.constructRayThroughPixel(nX, nY, j, i));
+			}
+		var sumPoints = new LinkedList<GeoPoint>();
+		for (var ray : rays) {
+			var result = body.findGeoIntersections(ray);
+			if (result != null)
+				sumPoints.addAll(result);
+		}
+		return sumPoints.size();
+	}
 }

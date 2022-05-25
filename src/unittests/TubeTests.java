@@ -1,54 +1,38 @@
+/**
+ * 
+ */
 package unittests;
 
-import geometries.Tube;
+import static org.junit.Assert.assertEquals;
+
 import org.junit.jupiter.api.Test;
 
+import geometries.Tube;
 import primitives.Point;
 import primitives.Ray;
-import primitives.Ray.*;
-import primitives.Util;
 import primitives.Vector;
 
-//import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.*;
-
 /**
- * Unit tests for geometries. Tube class
- * @author Tamar zommer, dvori azarkovitz
+ * @author noale
+ *
  */
-class TubeTest {
-    /**
-     *
-     */
-	/*
-    @Test
-    public void testGetNormal() {
-        // ============ Equivalence Partitions Tests ==============
-        Ray r= new Ray(new Vector(0,1,0), new Point(0,0,0));
-        Tube t= new Tube(r,1);
-        Point p = new Point(1,0,1);
-        Vector n= t.getNormal(p);
-        //assertTrue("bad normal to tube",isZero(r.getDir().dotProduct(n)));
-        // =============== Boundary Values Tests ==================
-        //
-        try {
-            new Tube(r,0).getNormal(p);
-            fail("GetNormal() should throw an exception, but it failed");
-        } catch (Exception e) {}
-    }
-    */
-    
+public class TubeTests {
+
 	/**
-	 * Test method for {@link Tube#getNormal(Point3D)}.
+	 * Test method for {@link geometries.Tube#getNormal(primitives.Point3D)}.
 	 */
 	@Test
 	public void testGetNormal() {
 		// ============ Equivalence Partitions Tests ==============
-				Ray r;
-				r = new Ray(new Vector(0,0,1), new Point(0,0,0));
-				Tube t=new Tube(r,1);
-				Point p=new Point(1,0,1);
-				Vector normal=t.getNormal(p);
-				assertTrue(Util.isZero(r.getDir().dotProduct(normal)), "bad normal to tube");
-				}
+		var tube = new Tube(new Ray(new Vector(0, 0, 1), new Point(0, 0, 1)), 1);
+
+		// Check that the normal is correct
+		assertEquals("getNormal(Point3D) -The normal to the Tube is not correct ",
+				new Vector(new Point(1, 0, 0).getXyz()).normalize(), tube.getNormal(new Point(1, 0, 6)));
+		
+		// =============== Boundary Values Tests ==================
+		// Check when the point is in front of the head Ray
+		assertEquals("getNormal() faild - point is in front of the head Ray!", new Vector(new Point(0, 1, 0).getXyz()),
+				tube.getNormal(new Point(0, 1, 1)));
+	}
 }

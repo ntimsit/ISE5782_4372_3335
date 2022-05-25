@@ -1,24 +1,34 @@
+/**
+ * 
+ */
 package unittests;
 
-import org.junit.Test;
-import primitives.Color;
+
+import org.junit.jupiter.api.Test;
+import java.awt.Color;
+
 import renderer.ImageWriter;
 
-public class ImageWriterTest {
-    /**
-     * Test for testing ImageWriter capabilities
-     */
-    @Test
-    public void testViewPlane(){
-        ImageWriter imageWriter = new ImageWriter("testViewPlane", 800, 500);
-        for (int x = 0; x < 800; x++) {
-            for (int y = 0; y < 500; y++) {
-                if(y % 50 == 0 || x % 50 == 0)
-                    imageWriter.writePixel(x, y, Color.BLACK);
-                else
-                    imageWriter.writePixel(x, y, new Color(0, 0, 255));
-            }
-        }
-        imageWriter.writeToImage();
-    }
+/**
+ * @author noale
+ *
+ */
+class ImageWriterTest {
+
+	/**
+	 * Test method for {@link renderer.ImageWriter#ImageWriter(java.lang.String, int, int)}.
+	 */
+	@Test
+	public void testImageWriter() {
+		var writer = new ImageWriter("firstImage", 800, 500);
+		for (int i = 0; i < 500; i++) {
+			for (int j = 0; j < 800; j++) {
+				if (i % 50 == 0 || j % 50 == 0 || i == 799 || j == 499)
+					writer.writePixel(j, i, new primitives.Color(Color.black));
+				else
+					writer.writePixel(j, i, new primitives.Color(Color.blue));
+			}
+		}
+		writer.writeToImage();
+	}
 }

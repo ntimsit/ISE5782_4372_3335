@@ -2,14 +2,11 @@
  * 
  */
 package unittests;
-import static java.lang.System.out;
 import static org.junit.jupiter.api.Assertions.*;
 import static primitives.Util.isZero;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
-import primitives.Point;
 import primitives.Vector;
 
 /**
@@ -17,7 +14,7 @@ import primitives.Vector;
  *
  */
 
-class VectorTest {
+class VectorTests {
 	Vector v1 = new Vector(1, 2, 3);
 	Vector v2 = new Vector(-2, -4, -6);
 	Vector v3 = new Vector(0, 3, -2);

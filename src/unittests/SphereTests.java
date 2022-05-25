@@ -1,138 +1,156 @@
+/**
+ * 
+ */
 package unittests;
 
-import org.junit.jupiter.api.Test;
-
-import primitives.*;
-import geometries.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static primitives.Util.isZero;
+import org.junit.jupiter.api.Test;
+
+import geometries.Intersectable.GeoPoint;
+import geometries.Sphere;
+import primitives.Double3;
+import primitives.Point;
+import primitives.Ray;
+import primitives.Vector;
 
 /**
- * Unit tests for geometries.Sphare class
- * @author Noa and naaama
+ * @author noale
+ *
  */
-class SphareTest {
+class SphereTests {
+		/**
+		 * Test method for {@link geometries.Sphere#getNormal(primitives.Point3D)}.
+		 */
+		@Test
+		public void testGetNormal() {
+			// ============ Equivalence Partitions Tests ==============
+			var ball = new Sphere(new Point(0, 0, 0), 1);
 
-    /**
-     * Test method for {@link geometries.Sphere#getNormal(primitives.Point)}.
-     */
-    @Test
-    public void testGetNormal() {
-        // ============ Equivalence Partitions Tests ==============
-        Point p= new Point(1, 1, 6);
-        Point p1=new Point(1,1,1);
-        Sphere s = new Sphere(p1,5);
-        Vector v= p1.subtract(p).normalize();
+			// Check that the normal is correct
+			assertEquals("getNormal(Point3D) -The normal to the Sphere is not correct ", new Vector(1, 0, 0),
+					ball.getNormal(new Point(1, 0, 0)));
+		}
 
-        assertEquals(v, s.getNormal(p), "Bad normal to sphere");//regular case
-    }
-    
-    /**
-	 * Test method for {@link Sphere#findIntersections(Ray)}
-	 */
-	@Test
-	public void testFindIntersections (){
-		Sphere sphere = new Sphere(new Point(1, 0, 0) , 4);
-		List<Point> intsersections;
-		Ray ray;
+		/**
+		 * Test method for {@link geometries.Sphere#findIntersections(Ray)}.
+		 */
+		@Test
+		public void testFindIntersections() {
+			// ============ Equivalence Partitions Tests ==============
+			var sphere = new Sphere(new Point(1, 0, 0), 1);
 
-		// ============ Equivalence Partitions Tests ==============
+			// TC01: Ray's line is outside the sphere (0 points)
+			assertNull("Ray's line out of sphere",
+					sphere.findGeoIntersections(new Ray(new Vector(-1, 0, 0), new Point(1, 1, 0))));
 
-		// TC01: Ray is going through the sphere (2 points).
-		ray = new Ray(new Vector(-1, 0, 0), new Point(6, 0, 0));
-		intsersections = sphere.findIntsersections(ray);
-		assertNotNull(intsersections);
-		assertEquals(2, intsersections.size(), "wrong number of points");
-		assertEquals(new Point(-3, 0, 0), intsersections.get(0), "Wrong point");
-		assertEquals(new Point(5, 0, 0), intsersections.get(1), "Wrong point");
+			// TC02: Ray starts before and crosses the sphere (2 points)
+			Point p1 = new Point(0.0651530771650466, 0.355051025721682, 0);
+			Point p2 = new Point(1.53484692283495, 0.844948974278318, 0);
+			
+			List<GeoPoint> result = sphere.findGeoIntersections(new Ray(new Vector(-1, 0, 0), new Point(3, 1, 0)));
+			assertEquals("Wrong number of points",2, result.size());
+			if (result.get(0).getX() > result.get(1).getX())
+				result = List.of(result.get(1), result.get(0));
 
-		// TC02: Ray is going outside the sphere (0 points).
-		ray = new Ray(new Vector(0, 1, 0), new Point(1, 0, 5));
-		intsersections = sphere.findIntsersections(ray);
-		assertNull(intsersections);
+			assertEquals("Ray crosses sphere", List.of(p1, p2), result);
 
-		// TC03: Ray is starting outside the sphere and it's direction is opposite to sphere (0 points).
-		ray = new Ray(new Vector(-1, -1, -1), new Point(-5, -5, -5));
-		intsersections = sphere.findIntsersections(ray);
-		assertNull(intsersections);
+			// TC03: Ray starts inside the sphere (1 point)
+			 result = sphere.findGeoIntersections(new Ray(new Vector(1, 0.5, 0), new Point(1, 0, 0)));
+			assertEquals("Wrong number of points", 1, result.size());
+			assertEquals("Ray starts inside the sphere", new Point(1.8660254037844386, 0.5, 0), result.get(0));
 
-		// TC04: Ray is starting inside the sphere (1 points).
-		ray = new Ray(new Vector(-1, 4, 0), new Point(2, 0, 0));
-		intsersections = sphere.findIntsersections(ray);
-		assertNotNull(intsersections);
-		assertEquals(1, intsersections.size(), "wrong number of points");
-		assertEquals(new Point(1, 4, 0), intsersections.get(0), "Wrong point");
+			// TC04: Ray starts after the sphere (0 points)
+			assertNull("Ray starts after the sphere and cross sphere ????",
+					sphere.findGeoIntersections(new Ray(new Vector(2, 0.5, 0), new Point(1, 0, 0))));
 
+			// =============== Boundary Values Tests ==================
 
-		// =============== Boundary Values Tests ==================
+			// **** Group: Ray's line crosses the sphere (but not the center)
 
-		// TC05: Ray begin on the perimeter and it's direction opposite to sphere (0 points).
-		ray = new Ray(new Vector(1, 1, 1), new Point(1, 0, 4));
-		intsersections = sphere.findIntsersections(ray);
-		assertNull(intsersections);
+			// TC11: Ray starts at sphere and goes inside (1 points)
+			result = sphere.findGeoIntersections(new Ray(new Vector(1, 0, 0),new Point(0.1339745962155614, 0.5, 0)));
+			assertEquals("Wrong number of points", 1, result.size());
+			assertEquals("Ray starts at sphere and goes inside and not cross sphere",
+					new Point(1.8660254037844386, 0.5, 0), result.get(0));
 
-		// TC06: Ray begin on the perimeter and it's direction to sphere (1 points).
-		ray = new Ray(new Vector(-4, 0, 4), new Point(5, 0, 0));
-		intsersections = sphere.findIntsersections(ray);
-		assertNotNull(intsersections);
-		assertEquals(1, intsersections.size(), "wrong number of points");
-		assertEquals(new Point(1, 0, 4), intsersections.get(0), "Wrong point");
+			// TC12: Ray starts at sphere and goes outside (0 points)
+			assertNull("Ray starts at sphere and goes outside and cross sphere ????",
+					sphere.findGeoIntersections(new Ray(new Vector(-1, 0, 0),new Point(0.1339745962155614, 0.5, 0))));
 
-		// TC07: Ray begin outside the sphere and tangent to sphere (0 points).
-		ray = new Ray( new Vector(1, 0, 0), new Point(0, 0, 4));
-		intsersections = sphere.findIntsersections(ray);
-		assertNull(intsersections);
+			// **** Group: Ray's line goes through the center
+			// TC13: Ray starts before the sphere (2 points)
+			p1 = new Point(0, 0, 0);
+			p2 = new Point(2, 0, 0);
+			result = sphere.findGeoIntersections(new Ray(new Vector(1, 0, 0),new Point(-1, 0, 0)));
 
-		// TC08: Ray begin on the perimeter of the sphere and tangent to sphere (0 points).
-		ray = new Ray(new Vector(1, 0, 0), new Point(1, 0, 4));
-		intsersections = sphere.findIntsersections(ray);
-		assertNull(intsersections);
+			assertEquals("Wrong number of points", 2, result.size());
+			if (result.get(0).getX() > result.get(1).getX())
+				result = List.of(result.get(1), result.get(0));
+			assertEquals("Ray crosses sphere", List.of(p1, p2), result);
 
-		// TC09: Ray begin outside the sphere on the tangent's continuation of the sphere (0 points).
-		ray = new Ray(new Vector(1, 0, 0), new Point(2, 0, 4));
-		intsersections = sphere.findIntsersections(ray);
-		assertNull(intsersections);
+			// TC14: Ray starts at sphere and goes inside (1 points)
+			result = sphere.findGeoIntersections(new Ray(new Vector(-1, 0, 0),new Point(2, 0, 0)));
+			assertEquals("Wrong number of points", 1, result.size());
+			assertEquals("Ray starts at sphere and goes inside and cross in other place",Double3.ZERO, result.get(0));
 
-		// TC10: Ray begin outside the sphere and its direction is vertically to the Radius vector continuation (0 points).
-		ray = new Ray(new Vector(0, 0, 1), new Point(6, 0, 0));
-		intsersections = sphere.findIntsersections(ray);
-		assertNull(intsersections);
+			// TC15: Ray starts inside (1 points)
+			result = sphere.findGeoIntersections(new Ray(new Vector(1, 0, 0),new Point(1.5, 0, 0)));
+			assertEquals("Wrong number of points", 1, result.size());
+			assertEquals("The Ray does not cross in the right place", new Point(2, 0, 0), result.get(0));
 
-		// TC11: Ray begin on sphere perimeter and its direction is the continuation of the Radius vector outside sphere (0 points).
-		ray = new Ray(new Vector(1, 0, 0), new Point(5, 0, 0));
-		intsersections = sphere.findIntsersections(ray);
-		assertNull(intsersections);
+			// TC16: Ray starts at the center (1 points)
+			result = sphere.findGeoIntersections(new Ray(new Vector(1, 0, 0),new Point(1, 0, 0)));
+			assertEquals("Wrong number of points", 1, result.size());
+			assertEquals("The Ray does not cross in the right place", new Point(2, 0, 0), result.get(0));
 
-		// TC12: Ray begin outside the sphere and it's direction is on Radius vector opposite to sphere (0 points).
-		ray = new Ray( new Vector(1, 0, 0), new Point(6, 0, 0));
-		intsersections = sphere.findIntsersections(ray);
-		assertNull(intsersections);
+			// TC17: Ray starts at sphere and goes outside (0 points)
+			assertNull("Ray starts at sphere and goes outside and cross ???",
+					sphere.findGeoIntersections(new Ray(new Vector(1, 0, 0),new Point(2, 0, 0))));
 
-		// TC13: Ray begin inside the sphere going outside the sphere on the Radius vector (1 points).
-		ray = new Ray(new Vector(1, 0, 0), new Point(4, 0, 0));
-		intsersections = sphere.findIntsersections(ray);
-		assertNotNull(intsersections);
-		assertEquals(1, intsersections.size(), "wrong number of points");
-		assertEquals(new Point(5, 0, 0), intsersections.get(0), "Wrong point");
+			// TC18: Ray starts after sphere (0 points)
+			assertNull("Ray's line need to be after of sphere",
+					sphere.findGeoIntersections(new Ray(new Vector(1, 0, 0),new Point(3, 0, 0))));
 
-		// TC14: Ray begin on sphere perimeter and going through the center of the sphere (1 points).
-		ray = new Ray(new Vector(1, 0, 0), new Point(-3, 0, 0));
-		intsersections = sphere.findIntsersections(ray);
-		assertNotNull(intsersections);
-		assertEquals(1, intsersections.size(), "wrong number of points");
-		assertEquals(new Point(5, 0, 0), intsersections.get(0), "Wrong point");
+			// **** Group: Ray's line is tangent to the sphere (all tests 0 points)
+			// TC19: Ray starts before the tangent point
+			assertNull("Ray starts before the tangent point and not cross the sphere",
+					sphere.findGeoIntersections(new Ray(new Vector(1, 0, 0),new Point(0, 1, 0))));
 
-		// TC15: Ray begin outside sphere and going through the center of the sphere (2 points).
-		ray = new Ray(new Vector(1, 0, 0), new Point(-4, 0, 0));
-		intsersections = sphere.findIntsersections(ray);
-		assertNotNull(intsersections);
-		assertEquals(2, intsersections.size(), "wrong number of points");
-		assertEquals(new Point(5, 0, 0), intsersections.get(0), "Wrong point");
-		assertEquals(new Point(-3, 0, 0), intsersections.get(1), "Wrong point");
+			// TC20: Ray starts at the tangent point
+			assertNull("Ray starts at the tangent point and not cross the sphere",
+					sphere.findGeoIntersections(new Ray(new Vector(1, 0, 0),new Point(1, 1, 0))));
+
+			// TC21: Ray starts after the tangent point
+			assertNull("Ray starts after the tangent point and not cross the sphere",
+					sphere.findGeoIntersections(new Ray( new Vector(1, 0, 0),new Point(2, 1, 0))));
+
+			// **** Group: Special cases
+			// TC19: Ray's line is outside, ray is orthogonal to ray start to sphere's
+			// center line
+			assertNull("Ray's line is outside, ray is orthogonal to ray start to sphere's center line",
+					sphere.findGeoIntersections(new Ray( new Vector(0, 1, 0),new Point(-0.5, 0, 0))));
+		}
+		
+		@Test
+		void testfindGeoIntersectionWithMax() {
+			
+			// TC01: 0 intersection point
+			Sphere sphere=new Sphere(new Point(4,0,0),1);
+			var result=sphere.findGeoIntersections(new Ray(new Vector(1,0,0),new Point(0,0,0)),2);
+			assertNull(null,result);
+			
+			//TC02: 1 intersections point
+			var l=sphere.findGeoIntersections(new Ray(new Vector(1,0,0),new Point(0,0,0)),4);
+			assertEquals(1,l.size());
+			
+			// TC03: 2 intersection point
+			result=sphere.findGeoIntersections(new Ray(new Vector(1,0,0),new Point(0,0,0)),6);
+			assertEquals(2,result.size());
+		}
 	}
-   
-}
+
 
