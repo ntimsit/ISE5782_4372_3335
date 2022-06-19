@@ -1,5 +1,6 @@
 package primitives;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -72,8 +73,12 @@ public class Ray {
 		 * @return the closest point to the specific ray
 		 */
 		public Point findClosestPoint(List<Point> points) {
+			List<GeoPoint> geoPoints = new ArrayList<>();
+			for (var p: points) {
+				geoPoints.add(new GeoPoint(null, p));
+			}
 		    return points == null || points.isEmpty() ? null
-		           : findClosestGeoPoint(points.stream().map(p -> new GeoPoint(null, p)).toList()).point;
+		           : findClosestGeoPoint(geoPoints).point;
 		}
 
 

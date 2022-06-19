@@ -1,5 +1,6 @@
 package geometries;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import primitives.Material;
@@ -15,8 +16,11 @@ public abstract class Intersectable {
 	
 	public List<Point> findIntersections(Ray ray) {
 	    var geoList = findGeoIntersections(ray);
-	    return geoList == null ? null
-	                           : geoList.stream().map(gp -> gp.point).toList();
+	    List<Point> points = new ArrayList<>();
+	    for (var gp: geoList) {
+	    	points.add(gp.point);
+	    }
+	    return geoList == null ? null : points;
 	}
 	public final List<GeoPoint> findGeoIntersections(Ray ray) {
     	return findGeoIntersections(ray, Double.POSITIVE_INFINITY);
