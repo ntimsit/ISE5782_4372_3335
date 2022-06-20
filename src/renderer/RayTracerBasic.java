@@ -16,8 +16,8 @@ import scene.Scene;
 public class RayTracerBasic extends RayTracerBase {
 
 	private static final double DELTA = 0.1;
-	private static final int MAX_CALC_COLOR_LEVEL = 10;
-	private static final double MIN_CALC_COLOR_K = 0.001;
+	private static final int MAX_CALC_COLOR_LEVEL = 4;
+	private static final double MIN_CALC_COLOR_K = 1.0 / 256.0;
 	private static final Double3 INITIAL_K = new Double3(1,1,1);
 
 
@@ -82,17 +82,28 @@ public class RayTracerBasic extends RayTracerBase {
 		double nv = Util.alignZero(n.dotProduct(v));
 		if (!kkr.lowerThan(MIN_CALC_COLOR_K)) {
 			Ray reflectedRay = clacRayReflection(n, v, geopoint.point, nv);
-			GeoPoint reflectedPoint = findClosestIntersection(reflectedRay);
-			color = color.add(calcColor(reflectedPoint, reflectedRay, level - 1, kkr).scale(kr));
+			color = color.add(calcConeColor(reflectedRay, scene.coneRayCount, scene.coneRayAngle, level, kkr)).scale(kr);
+			
 		}
 		Double3 kt = material.kT;
 		Double3 kkt = kt.product(kkt2);
 		if (!kkt.lowerThan(MIN_CALC_COLOR_K)) {
 			Ray refractedRay = clacRayRefraction(n, v, geopoint.point, nv);
-			GeoPoint refractedPoint = findClosestIntersection(refractedRay);
-			color = color.add(calcColor(refractedPoint, refractedRay, level - 1, kkt).scale(kt));
+			color = color.add(calcConeColor(refractedRay, scene.coneRayCount, scene.coneRayAngle, level, kkt)).scale(kt);
 		}
 		return color;
+	}
+	
+	private Color calcConeColor(Ray ray, int count, double angle, int level, Double3 kk) {
+		List<Ray> rays = ray.getCone(count, angle);
+		Color color = Color.BLACK;
+		
+		for (Ray r : rays) {
+			GeoPoint closestPoint = findClosestIntersection(r);
+			color = color.add(calcColor(closestPoint, r, level - 1, kk));
+		}
+		
+		return color.reduce(count + 1);
 	}
 
 	/**

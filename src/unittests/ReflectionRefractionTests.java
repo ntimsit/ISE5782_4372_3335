@@ -71,6 +71,9 @@ public class ReflectionRefractionTests {
 
 		scene.lights.add(new SpotLight(new Color(1020, 400, 400), new Point(-750, -750, -150), new Vector(-1, -1, -4),1,0,0) //
 				.setkL(0.00001).setkQ(0.000005));
+		
+		scene.coneRayAngle = 10;
+		scene.coneRayCount = 50;
 
 		ImageWriter imageWriter = new ImageWriter("reflectionTwoSpheresMirrored", 500, 500);
 		camera.setImageWriter(imageWriter) //

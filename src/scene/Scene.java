@@ -14,6 +14,8 @@ public class Scene {
 		public AmbientLight ambientLight ;
 		public Geometries geometries;
 	    public List<LightSource> lights=new LinkedList<>();
+	    public int coneRayCount = 0;
+	    public double coneRayAngle = 0;
 
 		
 		public Scene setLights(List<LightSource> lights) {

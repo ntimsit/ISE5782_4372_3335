@@ -103,5 +103,39 @@ public class Ray {
 			}
 			return minPoint;
 		}
+		
+		public List<Ray> getCone(int count, double angle) {
+			List<Ray> rays = new ArrayList<>();
+			rays.add(this);
+			
+			// (x,y,z) * (-y, x, 0) = 0
+			Vector normal1;
+			if (dir.getX() == 0 && dir.getY() == 0) {
+				normal1 = new Vector(1,0,0);
+			}
+			else  {
+				normal1 = new Vector(-dir.getY(), dir.getX(), 0).normalize();
+			}
+			
+			Vector normal2 = dir.crossProduct(normal1).normalize();
+			
+			for(int i = 0; i < count; i++) {
+				double maxRadius = Math.tan(angle * Math.PI/180);
+				double rand1 = (2 * Math.random() - 1);
+				double rand2 = (2 * Math.random() - 1) * Math.sqrt(1 - rand1*rand1);
+				Point destination = getPoint(1); // center of the "circle"
+				if (rand1 * maxRadius != 0) {
+					destination = destination.add(normal1.scale(rand1 * maxRadius));
+				}
+				if (rand2 * maxRadius != 0) {
+					destination = destination.add(normal2.scale(rand2 * maxRadius));
+				}
+				Vector rayDir = destination.subtract(p0).normalize();
+				rays.add(new Ray(rayDir, p0.add(rayDir)));
+			}		
+			
+			
+			return rays;
+		}
 }
 
