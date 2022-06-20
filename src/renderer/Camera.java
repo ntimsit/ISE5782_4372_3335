@@ -3,6 +3,8 @@
  */
 package renderer;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.MissingResourceException;
 
 import primitives.Color;
@@ -25,6 +27,16 @@ public class Camera {
 	private double distance;
 	private ImageWriter imageWriter;
 	private RayTracerBase rayTracer;
+	private double minimalScale = 1.0;
+	
+	
+	public double getMinimalScale() {
+		return minimalScale;
+	}
+	public Camera setMinimalScale(double minimalScale) {
+		this.minimalScale = minimalScale;
+		return this;
+	}
 	public Point getP0() {
 		return p0;
 	}
@@ -125,6 +137,50 @@ public class Camera {
 
 		return new Ray(vij,p0);
 	}
+	
+	public Point getCenterOfPixel(int nX, int nY, int j, int i) {
+		// image center
+		Point pc = p0.add(vTo.scale(distance));
+		// ratio
+		var ry = height / nY;
+		var rx = width / nX;
+		// pixel(i,j) center
+		var yi = (i - (nY - 1) / 2.0) * ry;
+		var xj = (j - (nX - 1) / 2.0) * rx;
+
+		Point pij = pc;
+		if (xj != 0)
+			pij = pij.add(vRight.scale(xj));
+		if (yi != 0)
+			pij = pij.add(vUp.scale(-yi));
+		
+		return pij;
+	}
+	
+	public List<Point> getCornersOfPixel(Point center, double scale) {
+		List<Point> corners = new ArrayList<>();
+		var ry = height / imageWriter.getNy() * scale;
+		var rx = width / imageWriter.getNx() * scale;	
+		
+		corners.add(center.add(vRight.scale(rx / 2)).add(vUp.scale(ry / 2)));
+		corners.add(center.add(vRight.scale(-rx / 2)).add(vUp.scale(ry / 2)));
+		corners.add(center.add(vRight.scale(-rx / 2)).add(vUp.scale(-ry / 2)));
+		corners.add(center.add(vRight.scale(rx / 2)).add(vUp.scale(-ry / 2)));		
+		
+		return corners;
+	}	
+	
+	public List<Ray> constructRaysThroughPixel(Point center, double scale) {
+		List<Ray> rays = new ArrayList<>();
+		rays.add(new Ray(center.subtract(p0), p0));
+		for (var corner : getCornersOfPixel(center, scale)) {
+			rays.add(new Ray(corner.subtract(p0), p0));
+		}		
+		
+		return rays;
+	}
+	
+	
 	public Camera renderImage()
 	{
 		if(this.p0==null || this.vTo==null|| this.vUp==null || this.rayTracer==null || this.vRight==null||this.imageWriter==null)
@@ -158,9 +214,42 @@ public class Camera {
 			throw new MissingResourceException("image writer failed", null, null);
 		imageWriter.writeToImage();
 	}
+	
+	private Color getColorOfPixel(Point center, double scale) {
+		List<Ray> rays = constructRaysThroughPixel(center, scale);
+		List<Color> colors = new ArrayList<Color>();
+		Color finalColor = Color.BLACK;
+		boolean areAllSimilar = true;
+		for(var ray : rays) {
+			colors.add(rayTracer.traceRay(ray));
+		}
+		for (var c1: colors) {
+			for (var c2: colors) {
+				if (!c1.isSimilar(c2)) {
+					areAllSimilar = false;
+					break;
+				}
+			}
+			if (!areAllSimilar) {
+				break;
+			}
+		}
+		if (!areAllSimilar && scale > minimalScale) {
+			List<Point> centers = getCornersOfPixel(center, scale / 4.0);
+			colors = new ArrayList<Color>();
+			for (var c : centers) {
+				colors.add(getColorOfPixel(c, scale / 4.0));
+			}
+		}
+		for (var color : colors) {
+			finalColor.add(color);
+		}
+		return finalColor.reduce(colors.size());
+	}
+	
 	private void castRay(int nX, int nY, int col, int row) {
-		Ray ray = constructRayThroughPixel(nX, nY, col, row);
-		Color color = rayTracer.traceRay(ray);
+		Point center = getCenterOfPixel(nX, nY, col, row);
+		Color color = getColorOfPixel(center, 1.0);
 		imageWriter.writePixel(col, row, color);
 	}
 }

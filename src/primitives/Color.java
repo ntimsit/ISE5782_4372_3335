@@ -21,6 +21,8 @@ public class Color {
 	 * Black color = (0,0,0)
 	 */
 	public static final Color BLACK = new Color();
+	
+	private static final double SMALL_DIFFERENCE = 20;
 
 	/**
 	 * Default constructor - to generate Black Color (privately)
@@ -142,6 +144,10 @@ public class Color {
 		if (k.d1 < 1.0 || k.d2 < 1.0 || k.d3 < 1.0)
 			throw new IllegalArgumentException("Can't scale a color by a by a number lower than 1");
 		return new Color(rgb.d1 / k.d1, rgb.d2 / k.d2, rgb.d3 / k.d3);
+	}
+	
+	public boolean isSimilar(Color other) {
+		return rgb.d1 - other.rgb.d1 < SMALL_DIFFERENCE && rgb.d2 - other.rgb.d2 < SMALL_DIFFERENCE && rgb.d3 - other.rgb.d3 < SMALL_DIFFERENCE;
 	}
 	
 }
